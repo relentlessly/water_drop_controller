@@ -44,12 +44,13 @@ const int solenoidPin = 10;
 const int integratedLed = 13;
 unsigned int cameraShutterDelay = 400;
 unsigned int cameraShutterCloseDelay = 500; // 1000ms / shutter speed = ms  [20ms = 1/50, 16ms = 1/60]
-unsigned int solenoidDelay = 150;
+unsigned int solenoidDelay = 50;
 unsigned int dropDelay = 10; // how long to wait for the drop to fall into frame
 String currentStatus = "";
 
 int switchState = 0;
 int enableDrop = 0;
+int enableDropReset = 0;
 int cameraState = 0;
 int flashState = 0;
 int integratedLedState = 0;
@@ -59,8 +60,8 @@ int dropState = 0;
 int dropCount = 0;
 int dropMin = 1023;
 int dropMax = 0;
-int dropFound = 0; // did we catch a drop?
-
+int dropDected = 0; // did we catch a drop?
+int dropFound = 0; // state machine
 unsigned long previousMillis = 0;
 
 
@@ -97,7 +98,7 @@ void setup() {
 //  250000;
 //1000000
   // disable when not debugging
- // Serial.begin(1000000);
+//  Serial.begin(250000);
   // put your setup code here, to run once:
   pinMode(photoTransistor,INPUT);
   pinMode(photoTransistorLED,OUTPUT);
@@ -151,10 +152,28 @@ void loop() {
 //  enableDrop = HIGH;
 //  Serial.println((String)"switchState"+ switchState);
   if (enableDrop == HIGH){
-    currentMillis = millis();
+    if (enableDropReset == 0){
+      // reset everything first
+      digitalWrite(cameraShutterPin, LOW);
+      digitalWrite(cameraFocusPin, LOW); // Set focus to low as well to reset shutter
+      digitalWrite(flashPin, LOW);
+      digitalWrite(integratedLed, LOW);
+      digitalWrite(solenoidPin, LOW);
+      cameraState = 0;
+      flashState = 0;
+      integratedLedState = 0;
+      solenoidState = 0;
+      dropState = 0;
+      dropFound = 0;
+      dropDected = 0;
+      // disable reset until we leave the menu
+      enableDropReset = 1;
+    }
+      
+//    currentMillis = millis();
     // Check if drop crossed sensor
     int photovalue = analogRead(photoTransistor);
-    //Serial.println((String)photovalue + ", dropCount" + (String)dropCount+ ", dropMin" + (String)dropMin+ ", dropMax" + (String)dropMax );
+//    Serial.println((String)photovalue + ", dropCount" + (String)dropCount+ ", dropMin" + (String)dropMin+ ", dropMax" + (String)dropMax );
     if (photovalue > dropMax){
       dropMax = photovalue;
     }
@@ -162,39 +181,29 @@ void loop() {
       dropMin = photovalue;
     }
     if (photovalue <= 970 ){
-      //Serial.println("we got one");
+//      Serial.println("we got one");
       dropFound = 1;
       dropCount++;
     }
-    // reset everything first
-    digitalWrite(cameraShutterPin, LOW);
-    digitalWrite(cameraFocusPin, LOW); // Set focus to low as well to reset shutter
-    digitalWrite(flashPin, LOW);
-    digitalWrite(integratedLed, LOW);
-    digitalWrite(solenoidPin, LOW);
-    cameraState = 0;
-    flashState = 0;
-    integratedLedState = 0;
-    solenoidState = 0;
-    dropState = 0;
         
     // let camera reset
     if(currentMillis - previousMillis > 4000) {
       if(cameraState != 1){
         previousMillis = currentMillis;
-//        Serial.println((String)"shutter currentMilis"+ currentMillis);
+        
         currentStatus = (String)"shutter";
         digitalWrite(integratedLed, HIGH);
         digitalWrite(cameraShutterPin, HIGH);
         digitalWrite(cameraFocusPin, HIGH);
         cameraState = 1;
         integratedLedState = 1;
+        //Serial.println((String)"shutter currentMilis"+ currentMillis+ (String)"state:"+ cameraState +solenoidState + flashState + dropState);
       }
     }
     // wait for shutter to open before trigger Solenoid water drop
     if((currentMillis - previousMillis) > cameraShutterDelay) {
       if (cameraState == 1 && solenoidState != 1 && flashState != 1 && dropState == 0){
-//        Serial.println((String)"dropping water open currentMilis"+ currentMillis);
+        //Serial.println((String)"dropping water open currentMilis"+ currentMillis);
         currentStatus =(String)"dropping water open";
         previousMillis = currentMillis;   
         digitalWrite(solenoidPin, HIGH);
@@ -214,20 +223,21 @@ void loop() {
     }
 
     //check if we got a drop via sensor
-    if (cameraState == 1 && solenoidState == 0 && flashState != 1 && dropState == 1){
+    if (cameraState == 1 && solenoidState == 0 && flashState != 1 && dropState == 1 && dropDected != 1){
       if(dropFound == 1){
         //reset the counter
         previousMillis = currentMillis;
         // set status
         currentStatus = (String)"Got one";
-        dropFound = 1;
+        dropDected = 1;
+        //Serial.println((String)"got one currentMilis"+ currentMillis+ (String)"prevMilis"+ previousMillis + (String)"state:"+ cameraState +solenoidState + flashState + dropState+dropDected);
       }
     }
     
 //    wait for shutter to open and drop to be dropped before trigger flash, we also wait for sensor to trigger then start the dropDelay "timer"
     //if(currentMillis - previousMillis > (cameraShutterDelay+solenoidDelay+dropDelay)) {
     if(currentMillis - previousMillis > (dropDelay)) {
-      if (cameraState == 1 && solenoidState == 0 && flashState != 1 && dropState == 1 && dropFound == 1){
+      if (cameraState == 1 && solenoidState == 0 && flashState != 1 && dropState == 1 && dropDected == 1){
 //        Serial.println((String)"flashing currentMilis"+ currentMillis);
         currentStatus = (String)"flashing";
         previousMillis = currentMillis;   
@@ -238,7 +248,7 @@ void loop() {
     // reset delay // so that the pin doesnt go high->low instantanenously
     // and in bulb mode how long we want the shutter open
     if(currentMillis - previousMillis > (cameraShutterCloseDelay+solenoidDelay+dropDelay)) {
-        if( cameraState == 1 && flashState == 1 && dropState == 1 ){
+        if( cameraState == 1 && solenoidState == 0 && flashState == 1 && dropState == 1 && dropDected == 1 ){
           //Serial.println((String)"reset currentMilis"+ currentMillis);
           currentStatus = (String)"reset";
           previousMillis = currentMillis;  
@@ -254,6 +264,7 @@ void loop() {
           solenoidState = 0;
           dropState = 0;
           dropFound = 0;
+          dropDected = 0;
       }
     }
   }
@@ -263,6 +274,8 @@ void loop() {
     digitalWrite(flashPin, LOW);
     digitalWrite(integratedLed, LOW);
     digitalWrite(solenoidPin, LOW);
+    enableDropReset = 0;
+    currentStatus = (String)"";
   }
 
   // MENU LOOP
