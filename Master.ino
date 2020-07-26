@@ -46,6 +46,7 @@ unsigned int cameraShutterDelay = 400;
 unsigned int cameraShutterCloseDelay = 500; // 1000ms / shutter speed = ms  [20ms = 1/50, 16ms = 1/60]
 unsigned int solenoidDelay = 50;
 unsigned int dropDelay = 10; // how long to wait for the drop to fall into frame
+unsigned int resetCameraDelay = 4; // number of seconds
 String currentStatus = "";
 
 int switchState = 0;
@@ -78,6 +79,7 @@ LCDML_add         (1  , LCDML_0_1       , 1  , "Drop Delay"          , mFunc_dro
 LCDML_add         (2  , LCDML_0_1       , 2  , "Shutter Delay"       , mFunc_shutter_delay);                      // NULL = no menu function
 LCDML_add         (3  , LCDML_0_1       , 3  , "Shutter Close Delay" , mFunc_shutter_close_delay);                      // NULL = no menu function
 LCDML_add         (4  , LCDML_0_1       , 4  , "Solenoid Delay"      , mFunc_solenoid_delay);                      // NULL = no menu function
+LCDML_add         (5  , LCDML_0_1       , 5  , "Cam Reset Delay"     , mFunc_camera_reset_delay);                      // NULL = no menu function
 //LCDML_add         (3  , LCDML_0_2_1     , 2  , "P1 Settings"       , NULL);                    // NULL = no menu function
 //LCDML_add         (4  , LCDML_0_2_1_2   , 1  , "Warm"              , NULL);                    // NULL = no menu function
 //LCDML_add         (5  , LCDML_0_2_1_2   , 2  , "Cold"              , NULL);                    // NULL = no menu function
@@ -86,10 +88,11 @@ LCDML_add         (4  , LCDML_0_1       , 4  , "Solenoid Delay"      , mFunc_sol
 //LCDML_add         (8  , LCDML_0_2       , 2  , "Program 2"         , mFunc_p2);                // this menu function can be found on "LCDML_display_menuFunction" tab
 //LCDML_add         (9  , LCDML_0_2       , 3  , "Back"              , mFunc_back);              // this menu function can be found on "LCDML_display_menuFunction" tab
 //LCDML_add         (2 , LCDML_0         , 2  , "Screensaver"        , mFunc_screensaver);       // this menu function can be found on "LCDML_display_menuFunction" tab
-LCDML_add         (5 , LCDML_0         , 3  , "Status"               , mFunc_status);       // this menu function can be found on "LCDML_display_menuFunction" tab
+LCDML_add         (6 , LCDML_0         , 3  , "Status"               , mFunc_status);       // this menu function can be found on "LCDML_display_menuFunction" tab
+LCDML_add         (7 , LCDML_0         , 4  , "Dump water"           , mFunc_dump);         // this menu function can be found on "LCDML_display_menuFunction" tab
   // menu element count - last element id
   // this value must be the same as the last menu element
-  #define _LCDML_DISP_cnt    5
+  #define _LCDML_DISP_cnt    7
   // create menu
   LCDML_createMenu(_LCDML_DISP_cnt);
 
@@ -187,7 +190,7 @@ void loop() {
     }
         
     // let camera reset
-    if(currentMillis - previousMillis > 4000) {
+    if(currentMillis - previousMillis > (resetCameraDelay * 1000)) {
       if(cameraState != 1){
         previousMillis = currentMillis;
         
