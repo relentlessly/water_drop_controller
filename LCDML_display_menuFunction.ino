@@ -264,43 +264,32 @@ void mFunc_status(uint8_t param)
 // *********************************************************************
 // *********************************************************************
 void mFunc_dump(uint8_t param)
-// *********************************************************************
 {
   if(LCDML.FUNC_setup())          // ****** SETUP *********
   {
-    enableDrop = 1;
     // setup function
     lcd.setCursor(0, 0);
-    lcd.print(F("Hold click to dump water:"));
+    lcd.print(F("Hold to dump water:"));
+    enableDump = 1;
     //    LCDML.TIMER_msReset(g_timer_3);
-    LCDML.FUNC_setLoopInterval(100);  // starts a trigger event for the loop function every 100 milliseconds
+    //LCDML.FUNC_setLoopInterval(100);  // starts a trigger event for the loop function every 100 milliseconds
   }
 
   if(LCDML.FUNC_loop())           // ****** LOOP *********
   {
-//    if(LCDML.TIMER_ms(g_timer_3, 500)) {
-      lcd.setCursor(0, 3);
-      lcd.print("                    "); //20 spaces to reset line
-      lcd.setCursor(0, 3);
-      lcd.print(currentStatus);
-//    }
     // loop function, can be run in a loop when LCDML_DISP_triggerMenu(xx) is set
     // the quit button works in every DISP function without any checks; it starts the loop_end function
     if(LCDML.BT_checkAny()) { // check if any button is pressed (enter, up, down, left, right)
       // LCDML_goToMenu stops a running menu function and goes to the menu
-      if (LCDML.BT_checkLeft()){
-        digitalWrite(solenoidPin, HIGH);
-      }
-      if (LCDML.BT_checkUp() || LCDML.BT_checkDown() ){
-        digitalWrite(solenoidPin, LOW);
         LCDML.FUNC_goBackToMenu();
       }
   }
 
   if(LCDML.FUNC_close())      // ****** STABLE END *********
   {
+    enableDump = 0;
     // you can here reset some global vars or do nothing
-    enableDrop = 0;
+    
   }
 }
 

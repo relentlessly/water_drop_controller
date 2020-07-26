@@ -42,15 +42,16 @@ const int cameraShutterPin = 7;
 const int flashPin = 9;
 const int solenoidPin = 10;
 const int integratedLed = 13;
-unsigned int cameraShutterDelay = 400;
+unsigned int cameraShutterDelay = 300;
 unsigned int cameraShutterCloseDelay = 500; // 1000ms / shutter speed = ms  [20ms = 1/50, 16ms = 1/60]
-unsigned int solenoidDelay = 50;
+unsigned int solenoidDelay = 20;
 unsigned int dropDelay = 10; // how long to wait for the drop to fall into frame
-unsigned int resetCameraDelay = 4; // number of seconds
+unsigned int resetCameraDelay = 2; // number of seconds
 String currentStatus = "";
 
 int switchState = 0;
 int enableDrop = 0;
+int enableDump = 0;
 int enableDropReset = 0;
 int cameraState = 0;
 int flashState = 0;
@@ -101,7 +102,7 @@ void setup() {
 //  250000;
 //1000000
   // disable when not debugging
-//  Serial.begin(250000);
+  Serial.begin(1000000);
   // put your setup code here, to run once:
   pinMode(photoTransistor,INPUT);
   pinMode(photoTransistorLED,OUTPUT);
@@ -176,7 +177,7 @@ void loop() {
 //    currentMillis = millis();
     // Check if drop crossed sensor
     int photovalue = analogRead(photoTransistor);
-//    Serial.println((String)photovalue + ", dropCount" + (String)dropCount+ ", dropMin" + (String)dropMin+ ", dropMax" + (String)dropMax );
+    Serial.println((String)photovalue + ", dropCount" + (String)dropCount+ ", dropMin" + (String)dropMin+ ", dropMax" + (String)dropMax );
     if (photovalue > dropMax){
       dropMax = photovalue;
     }
@@ -184,7 +185,7 @@ void loop() {
       dropMin = photovalue;
     }
     if (photovalue <= 970 ){
-//      Serial.println("we got one");
+      Serial.println("we got one");
       dropFound = 1;
       dropCount++;
     }
@@ -270,6 +271,9 @@ void loop() {
           dropDected = 0;
       }
     }
+  }  
+  else if(enableDump == HIGH){
+    digitalWrite(solenoidPin, HIGH);
   }
   else{
     digitalWrite(cameraShutterPin, LOW);
