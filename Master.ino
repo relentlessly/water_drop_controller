@@ -142,19 +142,15 @@ void setup() {
 }
 
 void loop() {
+//  unsigned long timer = micros();
   unsigned long currentMillis = millis();
 //  switchState = digitalRead(switchPin);
 //  Serial.print((String)"led state"+  digitalRead(integratedLed));
 //  Serial.print((String)" camera state"+  digitalRead(cameraShutterPin));
 //  Serial.print((String)" flash state"+  digitalRead(flashPin));
 //  Serial.print((String)" Solenoid state"+  solenoidState + "\n");
-
-//    delay(2);
-//    digitalWrite(photoTransistorLED, LOW);
-//    delay(2);
     
 //  enableDrop = HIGH;
-//  Serial.println((String)"switchState"+ switchState);
   if (enableDrop == HIGH){
     if (enableDropReset == 0){
       // reset everything first
@@ -287,4 +283,5 @@ void loop() {
 
   // MENU LOOP
     LCDML.loop();
+//    Serial.println((String)"time elapsed during loop:"+ (micros()-timer));
 }
