@@ -324,7 +324,40 @@ void mFunc_sensor(uint8_t param)
   if(LCDML.FUNC_close())      // ****** STABLE END *********
   {
     // you can here reset some global vars or do nothing
-    
+  }
+}
+// *********************************************************************
+// *********************************************************************
+void mFunc_test(uint8_t param)
+{
+  if(LCDML.FUNC_setup())          // ****** SETUP *********
+  {
+    // setup function
+    enableTest  = 1;
+    lcd.setCursor(0, 0);
+//    lcd.print(F("sensor is: "));
+    //    LCDML.TIMER_msReset(g_timer_3);
+    LCDML.FUNC_setLoopInterval(100);  // starts a trigger event for the loop function every 100 milliseconds
+  }
+
+  if(LCDML.FUNC_loop())           // ****** LOOP *********
+  {
+    lcd.setCursor(0,0);
+    lcd.print(currentStatus);
+//    lcd.setCursor(11,0);
+     
+    // loop function, can be run in a loop when LCDML_DISP_triggerMenu(xx) is set
+    // the quit button works in every DISP function without any checks; it starts the loop_end function
+    if(LCDML.BT_checkAny()) { // check if any button is pressed (enter, up, down, left, right)
+      // LCDML_goToMenu stops a running menu function and goes to the menu
+        LCDML.FUNC_goBackToMenu();
+      }
+  }
+
+  if(LCDML.FUNC_close())      // ****** STABLE END *********
+  {
+    // you can here reset some global vars or do nothing
+    enableTest  = 0;
   }
 }
 
