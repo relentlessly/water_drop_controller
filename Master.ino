@@ -91,9 +91,10 @@ LCDML_add         (5  , LCDML_0_1       , 5  , "Cam Reset Delay"     , mFunc_cam
 //LCDML_add         (2 , LCDML_0         , 2  , "Screensaver"        , mFunc_screensaver);       // this menu function can be found on "LCDML_display_menuFunction" tab
 LCDML_add         (6 , LCDML_0         , 3  , "Status"               , mFunc_status);       // this menu function can be found on "LCDML_display_menuFunction" tab
 LCDML_add         (7 , LCDML_0         , 4  , "Dump water"           , mFunc_dump);         // this menu function can be found on "LCDML_display_menuFunction" tab
+LCDML_add         (8 , LCDML_0         , 5  , "Sensor"           , mFunc_sensor);         // this menu function can be found on "LCDML_display_menuFunction" tab
   // menu element count - last element id
   // this value must be the same as the last menu element
-  #define _LCDML_DISP_cnt    7
+  #define _LCDML_DISP_cnt    8
   // create menu
   LCDML_createMenu(_LCDML_DISP_cnt);
 
@@ -278,6 +279,7 @@ void loop() {
     digitalWrite(integratedLed, LOW);
     digitalWrite(solenoidPin, LOW);
     enableDropReset = 0;
+    dropCount = 0;
     currentStatus = (String)"";
   }
 
