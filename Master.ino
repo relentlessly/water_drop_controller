@@ -290,10 +290,11 @@ void loop() {
       dropCount++;
     }
     // wait for shutter to open before trigger Solenoid water drop
-    if((currentMillis - previousMillis) > 150) {
+    if((currentMillis - previousMillis) > 350) {
       if (solenoidState != 1 && dropState == 0){
         //Serial.println((String)"dropping water open currentMilis"+ currentMillis);
-        currentStatus =(String)"dropping water open";
+//        currentStatus =(String)"dropping water open";
+        currentStatus=(String)"dropping";
         previousMillis = currentMillis;   
         digitalWrite(solenoidPin, HIGH);
         solenoidState = 1;
@@ -304,11 +305,16 @@ void loop() {
     if(currentMillis - previousMillis > (solenoidDelay)) {
       if ( solenoidState == 1 && dropState == 1){
         //Serial.println((String)"dropping water close currentMilis"+ currentMillis + (String)" total delay"+(cameraShutterDelay+solenoidDelay+dropDelay) );
-        currentStatus = (String)"dropping water close";
+//        currentStatus = (String)"dropping water close";
         previousMillis = currentMillis;   
         digitalWrite(solenoidPin, LOW);
         solenoidState = 0;
       }
+    }
+    // wait 100ms for drop to fall then reset
+    if(currentMillis - previousMillis > 750){
+      solenoidState = 0;
+      dropState= 0;
     }
     
   } // end enable test

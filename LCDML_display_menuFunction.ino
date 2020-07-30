@@ -337,11 +337,13 @@ void mFunc_test(uint8_t param)
     lcd.setCursor(0, 0);
 //    lcd.print(F("sensor is: "));
     //    LCDML.TIMER_msReset(g_timer_3);
-    LCDML.FUNC_setLoopInterval(100);  // starts a trigger event for the loop function every 100 milliseconds
+    LCDML.FUNC_setLoopInterval(50);  // starts a trigger event for the loop function every 100 milliseconds
   }
 
   if(LCDML.FUNC_loop())           // ****** LOOP *********
   {
+    lcd.setCursor(0,0);
+    lcd.print(F("                            "));
     lcd.setCursor(0,0);
     lcd.print(currentStatus);
 //    lcd.setCursor(11,0);
