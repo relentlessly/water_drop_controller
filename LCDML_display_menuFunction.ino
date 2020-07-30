@@ -235,24 +235,24 @@ void mFunc_status(uint8_t param)
     lcd.print(currentStatus);
     
 //    LCDML.TIMER_msReset(g_timer_3);
-    LCDML.FUNC_setLoopInterval(100);  // starts a trigger event for the loop function every 100 milliseconds
+//    LCDML.FUNC_setLoopInterval(1000);  // starts a trigger event for the loop function every 100 milliseconds
   }
 
-  if(LCDML.FUNC_loop())           // ****** LOOP *********
-  {
+//  if(LCDML.FUNC_loop())           // ****** LOOP *********
+//  {
 //    if(LCDML.TIMER_ms(g_timer_3, 500)) {
-      lcd.setCursor(0, 3);
-      lcd.print("                    "); //20 spaces to reset line
-      lcd.setCursor(0, 3);
-      lcd.print(currentStatus);
+//      lcd.setCursor(0, 3);
+//      lcd.print("                    "); //20 spaces to reset line
+//      lcd.setCursor(0, 3);
+//      lcd.print(currentStatus);
 //    }
     // loop function, can be run in a loop when LCDML_DISP_triggerMenu(xx) is set
     // the quit button works in every DISP function without any checks; it starts the loop_end function
-    if(LCDML.BT_checkAny()) { // check if any button is pressed (enter, up, down, left, right)
+//    if(LCDML.BT_checkAny()) { // check if any button is pressed (enter, up, down, left, right)
       // LCDML_goToMenu stops a running menu function and goes to the menu
-      LCDML.FUNC_goBackToMenu();
-    }
-  }
+//      LCDML.FUNC_goBackToMenu();
+//    }
+//  }
 
   if(LCDML.FUNC_close())      // ****** STABLE END *********
   {
@@ -337,7 +337,7 @@ void mFunc_test(uint8_t param)
     lcd.setCursor(0, 0);
 //    lcd.print(F("sensor is: "));
     //    LCDML.TIMER_msReset(g_timer_3);
-    LCDML.FUNC_setLoopInterval(50);  // starts a trigger event for the loop function every 100 milliseconds
+    LCDML.FUNC_setLoopInterval(1000);  // starts a trigger event for the loop function every 100 milliseconds
   }
 
   if(LCDML.FUNC_loop())           // ****** LOOP *********
@@ -346,6 +346,16 @@ void mFunc_test(uint8_t param)
     lcd.print(F("                            "));
     lcd.setCursor(0,0);
     lcd.print(currentStatus);
+    lcd.setCursor(0,1);
+    lcd.print(F("                             "));
+    lcd.setCursor(0,1);
+    lcd.print(dropTotal);
+    lcd.print(F(" / "));
+    lcd.print(dropCount);
+    float percentage = (float)dropCount/(float)dropTotal;
+    percentage = (percentage*100);
+    lcd.print(F(" = "));
+    lcd.print(percentage);
 //    lcd.setCursor(11,0);
      
     // loop function, can be run in a loop when LCDML_DISP_triggerMenu(xx) is set
@@ -360,6 +370,8 @@ void mFunc_test(uint8_t param)
   {
     // you can here reset some global vars or do nothing
     enableTest  = 0;
+    dropCount = 0;
+    dropTotal = 0;
   }
 }
 

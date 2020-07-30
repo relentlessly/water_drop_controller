@@ -44,7 +44,7 @@ const int solenoidPin = 10;
 const int integratedLed = 13;
 unsigned int cameraShutterDelay = 300;
 unsigned int cameraShutterCloseDelay = 500; // 1000ms / shutter speed = ms  [20ms = 1/50, 16ms = 1/60]
-unsigned int solenoidDelay = 20;
+unsigned int solenoidDelay = 15;
 unsigned int dropDelay = 10; // how long to wait for the drop to fall into frame
 unsigned int resetCameraDelay = 2; // number of seconds
 String currentStatus = "";
@@ -61,12 +61,12 @@ int solenoidState = 0;
 int dropState = 0;
 // drop detector
 int dropCount = 0;
+int dropTotal = 0;
 int dropMin = 1023;
 int dropMax = 0;
 int dropDected = 0; // did we catch a drop?
 int dropFound = 0; // state machine
 unsigned long previousMillis = 0;
-
 
 // LCDML_0        => layer 0
 // LCDML_0_X      => layer 1
@@ -105,7 +105,7 @@ void setup() {
 //  250000;
 //1000000
   // disable when not debugging
-  Serial.begin(1000000);
+//  Serial.begin(1000000);
   // put your setup code here, to run once:
   pinMode(photoTransistor,INPUT);
   pinMode(photoTransistorLED,OUTPUT);
@@ -176,7 +176,7 @@ void loop() {
 //    currentMillis = millis();
     // Check if drop crossed sensor
     int photovalue = analogRead(photoTransistor);
-    Serial.println((String)photovalue + ", dropCount" + (String)dropCount+ ", dropMin" + (String)dropMin+ ", dropMax" + (String)dropMax );
+//    Serial.println((String)photovalue + ", dropCount" + (String)dropCount+ ", dropMin" + (String)dropMin+ ", dropMax" + (String)dropMax );
     if (photovalue > dropMax){
       dropMax = photovalue;
     }
@@ -277,12 +277,6 @@ void loop() {
   else if(enableTest == HIGH){
      int photovalue = analogRead(photoTransistor);
 //    Serial.println((String)photovalue + ", dropCount" + (String)dropCount+ ", dropMin" + (String)dropMin+ ", dropMax" + (String)dropMax );
-    if (photovalue > dropMax){
-      dropMax = photovalue;
-    }
-    if (photovalue < dropMin){
-      dropMin = photovalue;
-    }
     if (photovalue <= 970 ){
 //      Serial.println("we got one");
        currentStatus =(String)"Got a Drop";
@@ -290,7 +284,7 @@ void loop() {
       dropCount++;
     }
     // wait for shutter to open before trigger Solenoid water drop
-    if((currentMillis - previousMillis) > 350) {
+    if((currentMillis - previousMillis) > 100) {
       if (solenoidState != 1 && dropState == 0){
         //Serial.println((String)"dropping water open currentMilis"+ currentMillis);
 //        currentStatus =(String)"dropping water open";
@@ -308,6 +302,7 @@ void loop() {
 //        currentStatus = (String)"dropping water close";
         previousMillis = currentMillis;   
         digitalWrite(solenoidPin, LOW);
+        dropTotal++;
         solenoidState = 0;
       }
     }
@@ -315,6 +310,7 @@ void loop() {
     if(currentMillis - previousMillis > 750){
       solenoidState = 0;
       dropState= 0;
+      previousMillis = currentMillis;
     }
     
   } // end enable test
