@@ -44,8 +44,8 @@ const int solenoidPin = 10;
 const int integratedLed = 13;
 unsigned int cameraShutterDelay = 300;
 unsigned int cameraShutterCloseDelay = 500; // 1000ms / shutter speed = ms  [20ms = 1/50, 16ms = 1/60]
-unsigned int solenoidDelay = 15;
-unsigned int dropDelay = 10; // how long to wait for the drop to fall into frame
+unsigned int solenoidDelay = 12;
+unsigned int dropDelay = 200; // how long to wait for the drop to fall into frame
 unsigned int resetCameraDelay = 2; // number of seconds
 String currentStatus = "";
 
