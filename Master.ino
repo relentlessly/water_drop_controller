@@ -92,11 +92,9 @@ LCDML_add         (5  , LCDML_0_1       , 5  , "Cam Reset Delay"     , mFunc_cam
 //LCDML_add         (2 , LCDML_0         , 2  , "Screensaver"        , mFunc_screensaver);       // this menu function can be found on "LCDML_display_menuFunction" tab
 LCDML_add         (6 , LCDML_0         , 3  , "Status"               , mFunc_status);       // this menu function can be found on "LCDML_display_menuFunction" tab
 LCDML_add         (7 , LCDML_0         , 4  , "Dump water"           , mFunc_dump);         // this menu function can be found on "LCDML_display_menuFunction" tab
-LCDML_add         (8 , LCDML_0         , 5  , "Sensor"           , mFunc_sensor);         // this menu function can be found on "LCDML_display_menuFunction" tab
-LCDML_add         (9 , LCDML_0         , 6  , "Testing"           , mFunc_test);         // this menu function can be found on "LCDML_display_menuFunction" tab
   // menu element count - last element id
   // this value must be the same as the last menu element
-  #define _LCDML_DISP_cnt    9
+  #define _LCDML_DISP_cnt    7
   // create menu
   LCDML_createMenu(_LCDML_DISP_cnt);
 
@@ -274,46 +272,6 @@ void loop() {
   else if(enableDump == HIGH){
     digitalWrite(solenoidPin, HIGH);
   }
-  else if(enableTest == HIGH){
-     int photovalue = analogRead(photoTransistor);
-//    Serial.println((String)photovalue + ", dropCount" + (String)dropCount+ ", dropMin" + (String)dropMin+ ", dropMax" + (String)dropMax );
-    if (photovalue <= 970 ){
-//      Serial.println("we got one");
-       currentStatus =(String)"Got a Drop";
-      dropFound = 1;
-      dropCount++;
-    }
-    // wait for shutter to open before trigger Solenoid water drop
-    if((currentMillis - previousMillis) > 100) {
-      if (solenoidState != 1 && dropState == 0){
-        //Serial.println((String)"dropping water open currentMilis"+ currentMillis);
-//        currentStatus =(String)"dropping water open";
-        currentStatus=(String)"dropping";
-        previousMillis = currentMillis;   
-        digitalWrite(solenoidPin, HIGH);
-        solenoidState = 1;
-        dropState = 1;
-      }
-    }
-   // wait for solenoid delay miliseconds before shutting the solenoid so that we only get one drop
-    if(currentMillis - previousMillis > (solenoidDelay)) {
-      if ( solenoidState == 1 && dropState == 1){
-        //Serial.println((String)"dropping water close currentMilis"+ currentMillis + (String)" total delay"+(cameraShutterDelay+solenoidDelay+dropDelay) );
-//        currentStatus = (String)"dropping water close";
-        previousMillis = currentMillis;   
-        digitalWrite(solenoidPin, LOW);
-        dropTotal++;
-        solenoidState = 0;
-      }
-    }
-    // wait 100ms for drop to fall then reset
-    if(currentMillis - previousMillis > 750){
-      solenoidState = 0;
-      dropState= 0;
-      previousMillis = currentMillis;
-    }
-    
-  } // end enable test
   else{
     digitalWrite(cameraShutterPin, LOW);
     digitalWrite(cameraFocusPin, LOW);
